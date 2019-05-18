@@ -17,11 +17,7 @@ class MongoClient:
         return pymongo.MongoClient(uri)
 
     def get_station(self, emu: Union[str, int]) -> dict:
-        return self.stations.find_one({"_id": str(emu)})
+        return self.stations.find_one({"lifts": emu})
 
-    def get_all_stations(self) -> list:
-        out = []
-        for x in self.stations.find({}):
-            out.append(x)
-
-        return out
+    def get_all(self) -> [dict]:
+        return [x for x in self.stations.find({"lat": {"$ne": None}, "lng": {"$ne": None}})]
