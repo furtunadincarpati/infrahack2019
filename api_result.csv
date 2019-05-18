@@ -1,0 +1,17 @@
+lift_id,operational,event,event1,event2,event3,event4,event5,event6,event7,event8,event9,event10,event11,event12,event13,event14,event15,event16,event17,event18,event19,event20,event21,event22,event23,event24,event25,event26,event27,event28,event29,event30,event31,event32,event33,event34,event35,event36,event37,event38,event39,event40,event41,event42,event43,event44,event45,event46,event47,event48,event49,event50,event51,event52,event53,event54,event55,event56,event57,event58,event59,event60,event61,event62,event63,event64,event65,event66,event67,event68,event69,event70,event71,event72,event73,event74,event75,event76,event77,event78,event79,event80,event81,event82,event83,event84,event85,event86,event87,event88,event89,event90,event91,event92,event93,event94,event95,event96,event97,event98,event99
+1085,True
+1086,True
+1088,True
+8159,True,Lift on Car Preference,Service Not Available.,Pre-lock Failure Occurred,Call Failed,Lift on Car Preference,Service Not Available.,Lift on Car Preference,Service Not Available.
+8162,True,Lift Failed to Move
+8163,True,Call Failed,Lift Failed to Move,Service Not Available.,Not Operational,Lift Failed to Move,Service Not Available.,Not Operational
+8171,False,Lost Main Controller Supply,Primary Safety Circuit Lost.,Service Not Available.,Not Operational,Door Closing Fault Occurred
+8172,True,Door Closing Fault Occurred,Service Not Available.,Not Operational,Door Closing Fault Occurred,Service Not Available.,Not Operational,Door Closing Fault Occurred,Service Not Available.,Not Operational,Door Closing Fault Occurred,Service Not Available.,Not Operational,Door Closing Fault Occurred,Service Not Available.,Not Operational,Trapping Alarm / Lift Occupied,Door Closing Fault Occurred,Service Not Available.,Not Operational,Door Closing Fault Occurred,Service Not Available.,Not Operational,Door Closing Fault Occurred,Service Not Available.,Not Operational,Door Closing Fault Occurred,Service Not Available.,Not Operational,Call Failed,Door Closing Fault Occurred,Service Not Available.,Not Operational,Lift on Car Preference,Service Not Available.,Door Closing Fault Occurred,Service Not Available.,Not Operational
+8173,True
+8174,True,Call Failed
+8175,True
+8176,True
+8177,False,Lost Main Controller Supply,Service Not Available.,Not Operational,Door Closing Fault Occurred
+8178,True
+8204,True,Call Failed,Lift Failed to Move,Service Not Available.,Not Operational,Call Failed,Call Failed,Lift Failed to Move,Service Not Available.,Not Operational
+8540,True

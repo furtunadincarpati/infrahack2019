@@ -1,4 +1,4 @@
 flask
 jupyter
 requests
-
+flask-CORS
