@@ -8,7 +8,7 @@ class MongoClient:
 
     def __init__(self, uri: str,
                  db_name: str = "infrahack",
-                 station_col: str = "stations"):
+                 station_col: str = "stations_updated"):
 
         self.client = self.get_conn(uri)
 
@@ -22,7 +22,15 @@ class MongoClient:
         return self.stations.find_one({"lifts": emu})
 
     def get_all(self) -> [dict]:
-        return [x for x in self.stations.find({"lat": {"$ne": None}, "lng": {"$ne": None}})]
+        stations = [x for x in self.stations.find({"lat": {"$ne": None}, "lng": {"$ne": None}})]
+        for station in stations:
+            try:
+                del station['repair_times']
+
+            except:
+                station["avg_repair"] = "no data"
+
+        return stations
 
     def insert_incident(self, incident_type: str, station_name: str):
         """Insert a new incident into the database

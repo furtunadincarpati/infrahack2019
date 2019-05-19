@@ -1,3 +1,4 @@
+import json
 import pickle
 from lib.db import MongoClient
 import requests
@@ -8,21 +9,24 @@ import csv
 def get_faults() -> []:
 
     url = "https://europe-west1-infrahack.cloudfunctions.net/lifts-nr"
-    print(">> getting faults")
 
-    try:
-        re = requests.get(url, params={"timestamp": time.time(),
-                                       "events_lookback_period_sec": 0}, timeout=5)
-        return [x['lift_id'] for x in re.json()['data'] if x['currently_operational'] is False]
+    re = requests.get(url, params={"timestamp": time.time(),
+                                   "events_lookback_period_sec": 0}, timeout=5)
+    ret_arr = dict()
+    for lift in [x for x in re.json()['data'] if x['currently_operational'] is False]:
 
-    except Exception as e:
-        print(f">>api-call failed, using local data:\n{e}")
-        return pickle.load(open("data/faults.pkl", "rb"))
+        if lift.get("events") != []:
+            ret_arr[lift.get("lift_id")] =  lift.get("events")[0].get("start")
+        else:
+            ret_arr[lift.get("lift_id")] = None
+
+    return ret_arr
+
 
 
 def load_cms_faults() -> []:
 
-    out_data = []
+    out_data = dict()
     with open("Event Details.csv", newline='') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
 
@@ -36,7 +40,8 @@ def load_cms_faults() -> []:
                 emu_id = row[0].split(" - ")[0]
                 restored = row[4]
                 if restored == "":  # -> lift is still broken
-                    out_data.append(emu_id)
+                    t = time.strptime("/".join(row[3].split("/")[:2] + [row[3].split("/")[-1][2:]]), '%d/%m/%y %H:%M')
+                    out_data[emu_id] = time.mktime(t)
 
     return out_data
 
@@ -50,20 +55,24 @@ def prepare_faults(c: MongoClient) -> [dict]:
     try:
         stations = c.get_all()
 
-        faults = get_faults()
+        faults = {}
+        faults.update(get_faults())
         print(">>", faults)
-        faults += load_cms_faults()
+        faults.update(load_cms_faults())
         print(">>", faults)
         for station in stations:
 
             del station["_id"]
+            station['last_fault'] = []
             station["lift_status"] = []
             fault = 0
             working = 0
             for lift in station.get("lifts"):
-                if lift in faults:
+                if lift in faults.keys():
                     station['lift_status'].append((lift, False))
                     fault += 1
+
+                    station['last_fault'].append(faults[lift])
 
                 else:
                     station['lift_status'].append((lift, True))
@@ -73,6 +82,20 @@ def prepare_faults(c: MongoClient) -> [dict]:
             station["working_lifts"] = working
             station["total_lifts"] = working + fault
 
+            if station['last_fault'] != [] and station['avg_repair'] != "no data":
+                station['last_fault'] = max(station['last_fault'])
+                station['time_passed'] = time.time() - int(station['last_fault'])
+                station["fixed_aprox"] = round((int(station['avg_repair']) - int(station['time_passed'])) / 3600, 1)
+
+            elif station['last_fault'] != [] and station['avg_repair'] == "no data":
+                station["fixed_aprox"] = -1
+
+            else:
+                station['last_fault'] = None
+                station['time_passed'] = None
+                station["fixed_aprox"] = None
+
+        json.dump(stations, open("data.json", "w"))
         pickle.dump(stations, open("data.pickle", "wb"))
 
     except Exception as e:
