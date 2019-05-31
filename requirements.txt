@@ -2,3 +2,4 @@ flask
 jupyter
 requests
 flask-CORS
+pymongo
