@@ -23,7 +23,6 @@ def get_faults() -> []:
     return ret_arr
 
 
-
 def load_cms_faults() -> []:
 
     out_data = dict()
@@ -53,6 +52,9 @@ def prepare_faults(c: MongoClient) -> [dict]:
     """
 
     try:
+
+        raise Exception("APIS-USE disabled")
+
         stations = c.get_all()
 
         faults = {}
@@ -89,17 +91,18 @@ def prepare_faults(c: MongoClient) -> [dict]:
 
             elif station['last_fault'] != [] and station['avg_repair'] == "no data":
                 station["fixed_aprox"] = -1
+                station["fixed_aprox"] = 3.2
 
             else:
                 station['last_fault'] = None
                 station['time_passed'] = None
                 station["fixed_aprox"] = None
 
-        json.dump(stations, open("data.json", "w"))
-        pickle.dump(stations, open("data.pickle", "wb"))
+        json.dump(stations, open("data/data.json", "w"))
+        pickle.dump(stations, open("data/data.pickle", "wb"))
 
     except Exception as e:
         print(">> error:\n", e)
-        stations = pickle.load(open("data.pickle", "rb"))
+        stations = pickle.load(open("data/data.pickle", "rb"))
 
     return stations
