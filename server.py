@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory, redirect
 from lib.helper import prepare_faults
 from lib.db import MongoClient
 import json
@@ -10,10 +10,16 @@ CORS(app)
 c = MongoClient("mongodb://localhost:27017")
 
 
-@app.route('/', methods=['GET'])
+@app.route("/home")
 def index():
-    data = prepare_faults(c)
-    return render_template("index.html", data=json.dumps(data))
+    return render_template("index.html")
+
+@app.route("/")
+def reroute():
+    return redirect("/home")
+@app.route('/<path:path>')
+def send_static(path):
+    return send_from_directory('static', path)
 
 
 @app.route("/api/all", methods=["GET"])
