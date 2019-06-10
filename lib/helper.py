@@ -8,6 +8,7 @@ import csv
 
 def get_faults() -> []:
 
+    return {x: 1 for x in pickle.load(open("data/faults.pkl", "rb"))}
     url = "https://europe-west1-infrahack.cloudfunctions.net/lifts-nr"
 
     re = requests.get(url, params={"timestamp": time.time(),
@@ -16,7 +17,8 @@ def get_faults() -> []:
     for lift in [x for x in re.json()['data'] if x['currently_operational'] is False]:
 
         if lift.get("events") != []:
-            ret_arr[lift.get("lift_id")] =  lift.get("events")[0].get("start")
+            ret_arr[lift.get("lift_id")] = lift.get("events")[0].get("start")
+
         else:
             ret_arr[lift.get("lift_id")] = None
 
@@ -26,7 +28,7 @@ def get_faults() -> []:
 def load_cms_faults() -> []:
 
     out_data = dict()
-    with open("Event Details.csv", newline='') as csvfile:
+    with open("data/Event Details.csv", newline='') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
 
         counter = 0
@@ -53,8 +55,7 @@ def prepare_faults(c: MongoClient) -> [dict]:
 
     try:
 
-        raise Exception("APIS-USE disabled")
-
+        # raise Exception("APIS-USE disabled")
         stations = c.get_all()
 
         faults = {}
@@ -64,7 +65,7 @@ def prepare_faults(c: MongoClient) -> [dict]:
         print(">>", faults)
         for station in stations:
 
-            del station["_id"]
+            station["_id"] = str(station["_id"])
             station['last_fault'] = []
             station["lift_status"] = []
             fault = 0

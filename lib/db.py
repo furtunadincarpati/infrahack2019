@@ -1,19 +1,18 @@
 import time
-
 import pymongo
 from typing import Union
+from settings import mongo_settings
+from bson.objectid import ObjectId
 
 
 class MongoClient:
 
-    def __init__(self, uri: str,
-                 db_name: str = "infrahack",
-                 station_col: str = "stations_updated"):
+    def __init__(self, uri: str):
 
         self.client = self.get_conn(uri)
 
-        self.db = self.client[db_name]
-        self.stations = self.db[station_col]
+        self.db = self.client[mongo_settings.get("db")]
+        self.stations = self.db[mongo_settings.get("stations_collection")]
 
     def get_conn(self, uri: str) -> pymongo.MongoClient:
         return pymongo.MongoClient(uri)
@@ -32,13 +31,16 @@ class MongoClient:
 
         return stations
 
-    def insert_incident(self, incident_type: str, station_name: str):
+    def insert_incident(self, incident_type: int, station_id: str):
         """Insert a new incident into the database
 
         """
 
-        if self.stations.find_one({"name" : station_name}):
-            self.stations.update({"name": station_name}, {"$push": {"incidents": {"incident_type": incident_type,
-                                                                                  "timestamp": time.time()}}})
+        if self.stations.find_one({"_id": ObjectId(station_id)}):
+            self.stations.update({"_id": ObjectId(station_id)}, {"$push": {"incidents": {"incident_type": incident_type,
+                                                                               "timestamp": time.time()}}})
+            return 200
+
         else:
-            print(f">> station {station_name} not found")
+            print(">> station with _id: <{%s}> not found" % station_id)
+            return 400
