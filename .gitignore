@@ -108,4 +108,5 @@ venv.bak/
 .idea/
 UPRN Mapping Document v2/
 *.json
+*.csv
 test*
