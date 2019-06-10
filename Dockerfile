@@ -13,5 +13,6 @@ ADD lib lib/
 ADD data data/
 ADD templates templates/
 ADD static static/
+ADD settings.py .
 
 CMD ["python", "server.py"]

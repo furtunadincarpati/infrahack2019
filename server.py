@@ -1,25 +1,31 @@
 from flask import Flask, jsonify, render_template, request, send_from_directory, redirect
 from lib.helper import prepare_faults
 from lib.db import MongoClient
-import json
+from lib.exceptions import *
+from settings import server_settings
+import os
 from flask_cors import CORS
 
-app = Flask(__name__, static_url_path="/static")
+app = Flask(__name__, static_url_path="/")
 CORS(app)
 
-c = MongoClient("mongodb://localhost:27017")
+
+c = MongoClient(os.environ.get("MONGO_URI"))
 
 
 @app.route("/home")
 def index():
     return render_template("index.html")
 
+
 @app.route("/")
 def reroute():
     return redirect("/home")
+
+
 @app.route('/<path:path>')
 def send_static(path):
-    return send_from_directory('static', path)
+    return send_from_directory('', path)
 
 
 @app.route("/api/all", methods=["GET"])
@@ -32,10 +38,21 @@ def send_data():
     incident_type = request.form['incident_type']
     name = request.form['station']
 
-    c.insert_incident(incident_type, name)
+    status_code = c.insert_incident(incident_type, name)
 
-    return jsonify(success=True)
+    if status_code == 200:
+        return jsonify(success=True)
+
+    else:
+        raise InvalidUsage('Something went wrong', status_code=status_code)
+
+
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
 
 
 if __name__ == "__main__":
-    app.run("0.0.0.0", "8000")
+    app.run(server_settings.get("address"), server_settings.get("port"), debug=server_settings.get("debug"))
