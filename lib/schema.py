@@ -74,6 +74,7 @@ class StationsWithFaults(MongoengineObjectType):
 
 
 class Query(graphene.ObjectType):
+    """Graphene queries"""
     class Meta:
         description = "Available queries for Uplift Project"
 
