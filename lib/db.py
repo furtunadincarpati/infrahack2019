@@ -31,6 +31,19 @@ class MongoClient:
 
         return stations
 
+    def get_incidents(self) -> [dict]:
+        stations = [x for x in self.stations.find({"lat": {"$ne": None},
+                                                   "lng": {"$ne": None},
+                                                   "incidents": {"$ne": None}})]
+        for station in stations:
+            try:
+                del station['repair_times']
+
+            except:
+                station["avg_repair"] = "no data"
+
+        return stations
+
     def insert_incident(self, incident_type: int, station_id: str):
         """Insert a new incident into the database
 
@@ -38,7 +51,9 @@ class MongoClient:
 
         if self.stations.find_one({"_id": ObjectId(station_id)}):
             self.stations.update({"_id": ObjectId(station_id)}, {"$push": {"incidents": {"incident_type": incident_type,
-                                                                               "timestamp": time.time()}}})
+                                                                                         "timestamp": time.time(),
+                                                                                         "user": "test-user"}
+                                                                           }})
             return 200
 
         else:
