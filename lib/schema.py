@@ -28,6 +28,7 @@ class Station(MongoengineObjectType):
 
 
 class InsertIncident(graphene.Mutation):
+    """Inserts an Incident into the mongoDB"""
     class Meta:
         description = "This mutation is used to insert new incidents into mongo"
 
