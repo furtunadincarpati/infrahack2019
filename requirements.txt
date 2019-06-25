@@ -4,3 +4,8 @@ requests
 flask-CORS
 pymongo
 dnspython
+python-dotenv
+flask-graphql
+graphene
+graphene-mongo
+mongoengine
