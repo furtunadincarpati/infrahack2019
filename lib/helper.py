@@ -7,7 +7,6 @@ import csv
 
 
 def get_faults() -> []:
-
     return {x: 1 for x in pickle.load(open("data/faults.pkl", "rb"))}
     url = "https://europe-west1-infrahack.cloudfunctions.net/lifts-nr"
 
@@ -26,7 +25,6 @@ def get_faults() -> []:
 
 
 def load_cms_faults() -> []:
-
     out_data = dict()
     with open("data/Event Details.csv", newline='') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
@@ -47,7 +45,7 @@ def load_cms_faults() -> []:
     return out_data
 
 
-def prepare_faults(c: MongoClient) -> [dict]:
+def prepare_faults(c: MongoClient, *, option="all") -> [dict]:
     """Prepares and cleans Fault data
 
     :return:
@@ -55,21 +53,29 @@ def prepare_faults(c: MongoClient) -> [dict]:
 
     try:
 
-        # raise Exception("APIS-USE disabled")
-        stations = c.get_all()
+        if option in ["all", "faults"]:
+            stations = c.get_all()
+
+        elif option == "incidents":
+            stations = c.get_incidents()
+
+        if option == "faults":
+            faulty_stations = []
 
         faults = {}
         faults.update(get_faults())
         print(">>", faults)
         faults.update(load_cms_faults())
         print(">>", faults)
-        for station in stations:
+        for index, station in enumerate(stations.copy()):
 
+            station["incidents"] = station.setdefault('incidents', [])
             station["_id"] = str(station["_id"])
             station['last_fault'] = []
             station["lift_status"] = []
             fault = 0
             working = 0
+
             for lift in station.get("lifts"):
                 if lift in faults.keys():
                     station['lift_status'].append((lift, False))
@@ -99,11 +105,18 @@ def prepare_faults(c: MongoClient) -> [dict]:
                 station['time_passed'] = None
                 station["fixed_aprox"] = None
 
-        json.dump(stations, open("data/data.json", "w"))
-        pickle.dump(stations, open("data/data.pickle", "wb"))
+            if option == "faults":
+
+                if station["faulty_lifts"] != 0:
+                    faulty_stations.append(station)
+
+        if option == "faults":
+            stations = faulty_stations
+        json.dump(stations, open("data/%s.json" % option, "w"))
+        pickle.dump(stations, open("data/%s.pickle" % option, "wb"))
 
     except Exception as e:
         print(">> error:\n", e)
-        stations = pickle.load(open("data/data.pickle", "rb"))
+        stations = pickle.load(open("data/%s.pickle" % option, "rb"))
 
     return stations

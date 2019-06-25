@@ -109,4 +109,5 @@ venv.bak/
 UPRN Mapping Document v2/
 *.json
 *.csv
+*.pickle
 test*
